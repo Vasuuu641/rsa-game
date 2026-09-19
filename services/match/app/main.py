@@ -24,6 +24,12 @@ async def health():
     return {"status": "ok"}
 
 
+@app.get("/rooms/{room_id}/exists")
+async def room_exists(room_id: str):
+    room = state.get_room(room_id.upper())
+    return {"exists": room is not None}
+
+
 class JoinRoomRequest(BaseModel):
     room_id: str
     player_id: str
