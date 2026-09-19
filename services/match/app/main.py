@@ -6,6 +6,7 @@ import httpx
 import redis.asyncio as redis
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+import time
 
 from . import state
 from .difficulty import round_config, ROUNDS
@@ -15,6 +16,7 @@ app = FastAPI(title="match-service")
 CRYPTO_SERVICE_URL = os.environ.get("CRYPTO_SERVICE_URL", "http://localhost:8003")
 STATS_SERVICE_URL = os.environ.get("STATS_SERVICE_URL", "http://localhost:8004")
 REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
+ATTACK_COOLDOWN_SECONDS = 1.5
 
 redis_client = redis.from_url(REDIS_URL, decode_responses=True)
 
@@ -183,8 +185,21 @@ async def attack(req: AttackRequest):
     if room is None or room.n is None or room.status != "in_round":
         raise HTTPException(status_code=404, detail="room not in an active round")
 
+    # Rate limiting / cooldown check per room
+    now = time.time()
+    elapsed = now - room.last_attack_time
+    if elapsed < ATTACK_COOLDOWN_SECONDS:
+        remaining_wait = round(ATTACK_COOLDOWN_SECONDS - elapsed, 1)
+        raise HTTPException(
+            status_code=429,
+            detail=f"Attack on cooldown. Please wait {remaining_wait}s before trying again.",
+        )
+
+    # Update cooldown timestamp and increment counter
+    room.last_attack_time = now
     room.attempts_used += 1
 
+    # Send factor candidates to crypto-service for verification and decryption
     async with httpx.AsyncClient() as client:
         resp = await client.post(
             f"{CRYPTO_SERVICE_URL}/crack",
@@ -201,6 +216,7 @@ async def attack(req: AttackRequest):
 
     correct = data["correct"]
 
+    # Broadcast attack result to all clients connected via WebSocket/Redis pubsub
     await _publish(
         req.room_id,
         {
@@ -211,6 +227,7 @@ async def attack(req: AttackRequest):
         },
     )
 
+    # If Eve guessed correctly, end round and grant point
     if correct:
         if room.timer_task and not room.timer_task.done():
             room.timer_task.cancel()
@@ -218,8 +235,11 @@ async def attack(req: AttackRequest):
         room.status = "round_ready"
         await _finish_round(req.room_id, winner="eve")
 
-    return {"correct": correct, "attempts_used": room.attempts_used}
-
+    return {
+        "correct": correct,
+        "attempts_used": room.attempts_used,
+        "plaintext": data.get("plaintext"),
+    }
 
 async def _round_timer(room_id: str, seconds: int) -> None:
     remaining = seconds
