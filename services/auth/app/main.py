@@ -4,6 +4,7 @@ import random
 import string
 import datetime
 
+import httpx
 import jwt
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -20,6 +21,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+MATCH_SERVICE_URL = os.environ.get("MATCH_SERVICE_URL", "http://localhost:8000")
 
 JWT_SECRET = os.environ.get("JWT_SECRET", "dev-secret-change-me")
 JWT_ALGO = "HS256"
@@ -48,7 +50,7 @@ async def join(req: JoinRequest):
         raise HTTPException(status_code=400, detail="display_name is required")
 
     player_id = str(uuid.uuid4())
-    room_id = (req.room_id or _generate_room_code()).strip().upper()
+    room_id = (req.room_id or await _generate_unique_room_code()).strip().upper()
 
     payload = {
         "player_id": player_id,
@@ -78,6 +80,17 @@ def _generate_room_code(length: int = 4) -> str:
     return "".join(random.choices(string.ascii_uppercase, k=length))
 
 
-# TODO: room codes are generated without checking for collisions against
-# active rooms in match-service — fine at class-project scale, but worth
-# a comment in your writeup if a grader asks about it.
+async def _generate_unique_room_code(max_attempts: int = 10) -> str:
+    """Generates a random room code and checks match-service to ensure no collision."""
+    async with httpx.AsyncClient(timeout=3.0) as client:
+        for _ in range(max_attempts):
+            code = _generate_room_code()
+            try:
+                res = await client.get(f"{MATCH_SERVICE_URL}/rooms/{code}/exists")
+                if res.status_code == 200 and not res.json().get("exists", False):
+                    return code
+            except httpx.RequestError:
+                # Fallback if match-service is offline during standalone auth testing
+                return code
+
+    raise HTTPException(status_code=500, detail="Unable to generate unique room code")

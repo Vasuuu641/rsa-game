@@ -1,0 +1,10 @@
+{
+  "python.defaultInterpreterPath": "${workspaceFolder}/services/auth/.venv/bin/python",
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}/services/auth",
+    "${workspaceFolder}/services/crypto",
+    "${workspaceFolder}/services/gateway",
+    "${workspaceFolder}/services/match",
+    "${workspaceFolder}/services/stats"
+  ]
+}
