@@ -24,8 +24,16 @@ def reference_factor(n: int) -> tuple[int, int]:
     return primes[0], primes[1]
 
 
-# TODO(stretch goal): a pure-Python trial-division or Pollard's rho
-# implementation Eve's own client-side "cracking" UI can call/animate
-# against, separate from this server-side verifier. The server verifier
-# above is the source of truth either way — a client-side factoring
-# animation is cosmetic, not authoritative.
+def trial_division(n: int) -> tuple[int, int] | None:
+    """
+    Pure Python trial division suitable for animation or demonstration
+    at gameplay key-size scales (16–32 bits).
+    """
+    if n % 2 == 0:
+        return 2, n // 2
+    d = 3
+    while d * d <= n:
+        if n % d == 0:
+            return d, n // d
+        d += 2
+    return None

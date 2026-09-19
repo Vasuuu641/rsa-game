@@ -1,14 +1,4 @@
-"""
-RSA operations at gameplay-scale key sizes (16-64 bits).
-
-NOTE: the `cryptography` library refuses to generate keys below ~512
-bits (correctly, for real use) so it's not usable for the deliberately
-crackable keys this game needs. This module implements textbook RSA
-directly using sympy for prime generation — fine for a game where the
-whole point is that small keys ARE breakable, not fine for anything
-handling real secrets. Don't reuse this module outside this project.
-"""
-
+# RSA operations at gameplay-scale key sizes (16-64 bits).
 from sympy import randprime, gcd, mod_inverse
 
 
@@ -31,10 +21,19 @@ def generate_keypair(key_bits: int) -> dict:
             continue
         n = p * q
         phi = (p - 1) * (q - 1)
-        e = 65537 if 65537 < phi and gcd(65537, phi) == 1 else 17
-        if gcd(e, phi) != 1:
+
+        # Fall back gracefully to smaller valid coprime exponents if phi is too small
+        e_candidates = [65537, 17, 5, 3]
+        e = None
+        for cand in e_candidates:
+            if cand < phi and gcd(cand, phi) == 1:
+                e = cand
+                break
+
+        if e is None:
             continue
-        d = mod_inverse(e, phi)
+
+        d = int(mod_inverse(e, phi))
         return {"n": n, "e": e, "d": d, "p": p, "q": q, "key_bits": n.bit_length()}
 
 

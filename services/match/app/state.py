@@ -1,15 +1,8 @@
-"""
-In-memory match state, keyed by room_id.
-
-Good enough for a class project running a single match-service instance.
-If you ever needed to scale match-service horizontally you'd move this
-into Redis (it's already in the stack for pub/sub) — noted here rather
-than built, since it's out of scope for this version.
-"""
 
 import asyncio
 from dataclasses import dataclass, field
 from .difficulty import ROUNDS
+import time
 
 
 @dataclass
@@ -21,6 +14,7 @@ class PlayerState:
 
 @dataclass
 class RoomState:
+    last_attack_time: float = 0.0
     room_id: str
     players: dict[str, PlayerState] = field(default_factory=dict)
     round_number: int = 0
