@@ -5,6 +5,7 @@
     "${workspaceFolder}/services/crypto",
     "${workspaceFolder}/services/gateway",
     "${workspaceFolder}/services/match",
-    "${workspaceFolder}/services/stats"
+    "${workspaceFolder}/services/stats",
+    "${workspaceFolder}/services/stats/.venv/lib/python3.12/site-packages"
   ]
 }

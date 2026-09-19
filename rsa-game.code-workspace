@@ -1,0 +1,33 @@
+{
+  "folders": [
+    {
+      "name": "auth-service",
+      "path": "services/auth"
+    },
+    {
+      "name": "crypto-service",
+      "path": "services/crypto"
+    },
+    {
+      "name": "gateway-service",
+      "path": "services/gateway"
+    },
+    {
+      "name": "match-service",
+      "path": "services/match"
+    },
+    {
+      "name": "stats-service",
+      "path": "services/stats"
+    },
+    {
+      "name": "web-client",
+      "path": "web-client"
+    }
+  ],
+  "settings": {
+    "python.analysis.extraPaths": [
+      "${workspaceFolder}/app"
+    ]
+  }
+}

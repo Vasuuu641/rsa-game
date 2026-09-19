@@ -67,5 +67,25 @@ async def leaderboard():
     return [{"role": role, "wins": wins} for role, wins in rows]
 
 
-# TODO: pagination on a /results list endpoint once you have more than a
-# handful of rows — not needed for a class demo dataset.
+@app.get("/results")
+async def get_results(limit: int = 20, offset: int = 0):
+    async with AsyncSession(engine) as session:
+        stmt = (
+            select(MatchResult)
+            .order_by(MatchResult.created_at.desc())
+            .limit(limit)
+            .offset(offset)
+        )
+        results = (await session.execute(stmt)).scalars().all()
+
+    return [
+        {
+            "id": r.id,
+            "room_id": r.room_id,
+            "winner_role": r.winner_role,
+            "round_number": r.round_number,
+            "key_bits": r.key_bits,
+            "created_at": r.created_at.isoformat() if r.created_at else None,
+        }
+        for r in results
+    ]
