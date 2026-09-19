@@ -1,92 +1,66 @@
-services:
-  redis:
-    image: redis:7-alpine
-    ports:
-      - "6379:6379"
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
+version: '3.8'
 
+services:
   postgres:
-    image: postgres:16-alpine
+    image: postgres:15-alpine
+    container_name: postgres
     environment:
-      POSTGRES_USER: rsagame
-      POSTGRES_PASSWORD: rsagame
-      POSTGRES_DB: rsagame
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+      POSTGRES_DB: app_db
     ports:
       - "5432:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U rsagame"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d app_db"]
       interval: 5s
-      timeout: 3s
+      timeout: 5s
       retries: 5
+      start_period: 10s
+    restart: unless-stopped
 
   auth:
-    build: ./services/auth
-    environment:
-      JWT_SECRET: dev-secret-change-me
+    build:
+      context: ./auth
+      dockerfile: Dockerfile
+    container_name: auth-service
     ports:
       - "8001:8000"
-
-  crypto:
-    build: ./services/crypto
-    ports:
-      - "8003:8000"
-
-  stats:
-    build: ./services/stats
     environment:
-      DATABASE_URL: postgresql+asyncpg://rsagame:rsagame@postgres/rsagame
-    ports:
-      - "8004:8000"
+      DATABASE_URL: postgresql://postgres:postgrespassword@postgres:5432/app_db
     depends_on:
       postgres:
         condition: service_healthy
+    restart: unless-stopped
 
-  match:
-    build: ./services/match
-    environment:
-      CRYPTO_SERVICE_URL: http://crypto:8000
-      REDIS_URL: redis://redis:6379/0
-      STATS_SERVICE_URL: http://stats:8000
+  stats:
+    build:
+      context: ./stats
+      dockerfile: Dockerfile
+    container_name: stats-service
     ports:
       - "8002:8000"
-    depends_on:
-      redis:
-        condition: service_healthy
-      crypto:
-        condition: service_started
-      stats:
-        condition: service_started
-
-  gateway:
-    build: ./services/gateway
     environment:
-      REDIS_URL: redis://redis:6379/0
-      AUTH_SERVICE_URL: http://auth:8000
-      MATCH_SERVICE_URL: http://match:8000
-    ports:
-      - "8000:8000"
+      DATABASE_URL: postgresql://postgres:postgrespassword@postgres:5432/app_db
     depends_on:
-      redis:
+      postgres:
         condition: service_healthy
-      auth:
-        condition: service_started
-      match:
-        condition: service_started
+    restart: unless-stopped
 
-  web:
-    image: python:3.11-slim
-    working_dir: /site
-    volumes:
-      - ./web-client:/site
-    command: ["python", "-m", "http.server", "8080"]
+  match:
+    build:
+      context: ./match
+      dockerfile: Dockerfile
+    container_name: match-service
     ports:
-      - "8080:8080"
+      - "8003:8000"
+    environment:
+      DATABASE_URL: postgresql://postgres:postgrespassword@postgres:5432/app_db
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
 
 volumes:
-  pgdata:
+  postgres_data:

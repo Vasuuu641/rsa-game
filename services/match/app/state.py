@@ -11,6 +11,16 @@ class PlayerState:
     display_name: str
     role: str | None = None
 
+@dataclass
+class GameState:
+    # 1. Mandatory fields without default values first:
+    player_id: str
+    session_token: str
+    
+    # 2. Fields with default values last:
+    score: int = 0
+    is_active: bool = True
+
 
 @dataclass
 class RoomState:
