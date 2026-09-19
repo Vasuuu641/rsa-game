@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RSA Game — Alice, Bob &amp; Eve</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="masthead-mark">RSA</div>
+    <div class="masthead-text">
+      <h1>Alice, Bob &amp; Eve</h1>
+      <p>A live key-interception exercise</p>
+    </div>
+  </header>
+
+  <!-- SCREEN: join -->
+  <section id="screen-join" class="screen">
+    <div class="panel">
+      <h2>Enter the exchange</h2>
+      <p class="lede">Three players per room. The first two to arrive become Alice and Bob — the third is Eve. Roles are assigned automatically.</p>
+
+      <label class="field">
+        <span>Your name</span>
+        <input id="input-name" type="text" maxlength="24" placeholder="e.g. Priya" autocomplete="off" />
+      </label>
+
+      <label class="field">
+        <span>Room code <em>(leave blank to start a new room)</em></span>
+        <input id="input-room" type="text" maxlength="8" placeholder="e.g. QTWK" autocomplete="off" />
+      </label>
+
+      <button id="btn-join" class="btn btn-primary">Enter room</button>
+      <p id="join-error" class="error"></p>
+    </div>
+
+    <div class="panel panel-muted" id="panel-leaderboard">
+      <h3>Standing record</h3>
+      <div id="leaderboard-body" class="mono small muted">loading…</div>
+    </div>
+  </section>
+
+  <!-- SCREEN: lobby -->
+  <section id="screen-lobby" class="screen hidden">
+    <div class="panel">
+      <div class="room-code-row">
+        <span class="label">Room code</span>
+        <span id="lobby-room-code" class="room-code mono"></span>
+      </div>
+
+      <h2>Waiting for the exchange to fill</h2>
+      <ul id="lobby-players" class="player-list"></ul>
+
+      <button id="btn-start-round" class="btn btn-primary hidden">Begin round 1</button>
+      <p id="lobby-hint" class="hint">Share the room code above with two other players.</p>
+    </div>
+  </section>
+
+  <!-- SCREEN: game -->
+  <section id="screen-game" class="screen hidden">
+
+    <div class="status-bar">
+      <div class="status-item">
+        <span class="label">Room</span>
+        <span id="hud-room" class="mono"></span>
+      </div>
+      <div class="status-item">
+        <span class="label">Role</span>
+        <span id="hud-role" class="role-badge"></span>
+      </div>
+      <div class="status-item">
+        <span class="label">Round</span>
+        <span id="hud-round" class="mono">—</span>
+      </div>
+      <div class="status-item">
+        <span class="label">Score</span>
+        <span id="hud-score" class="mono">Defenders 0 – 0 Eve</span>
+      </div>
+      <div class="status-item status-timer">
+        <span class="label">Time left</span>
+        <span id="hud-timer" class="mono timer">—</span>
+      </div>
+    </div>
+
+    <div class="game-grid">
+
+      <div class="panel">
+        <h2 id="role-title">Standing by</h2>
+        <p id="role-desc" class="lede"></p>
+
+        <!-- Alice panel -->
+        <div id="panel-alice" class="role-panel hidden">
+          <div class="key-block">
+            <span class="label">Public key (n, e)</span>
+            <span id="alice-pub" class="mono key-value">—</span>
+          </div>
+          <div class="key-block">
+            <span class="label">Private key (d) — yours alone</span>
+            <span id="alice-priv" class="mono key-value key-secret">—</span>
+          </div>
+          <button id="btn-decrypt" class="btn btn-primary" disabled>Decrypt incoming message</button>
+          <div id="alice-plaintext" class="reveal-box hidden"></div>
+        </div>
+
+        <!-- Bob panel -->
+        <div id="panel-bob" class="role-panel hidden">
+          <div class="key-block">
+            <span class="label">Public key (n, e)</span>
+            <span id="bob-pub" class="mono key-value">—</span>
+          </div>
+          <label class="field">
+            <span>Message to Alice</span>
+            <input id="bob-message" type="text" maxlength="40" placeholder="Type a short message…" />
+          </label>
+          <button id="btn-send" class="btn btn-primary" disabled>Encrypt &amp; send</button>
+        </div>
+
+        <!-- Eve panel -->
+        <div id="panel-eve" class="role-panel hidden">
+          <div class="key-block">
+            <span class="label">Intercepted public key (n, e)</span>
+            <span id="eve-pub" class="mono key-value">—</span>
+          </div>
+          <div class="key-block">
+            <span class="label">Intercepted ciphertext</span>
+            <span id="eve-cipher" class="mono key-value">nothing intercepted yet</span>
+          </div>
+          <p class="hint">Factor <strong>n</strong> into its two primes to reconstruct the private key.</p>
+          <div class="attack-row">
+            <label class="field field-inline">
+              <span>p</span>
+              <input id="eve-p" type="text" inputmode="numeric" />
+            </label>
+            <label class="field field-inline">
+              <span>q</span>
+              <input id="eve-q" type="text" inputmode="numeric" />
+            </label>
+          </div>
+          <button id="btn-attack" class="btn btn-danger" disabled>Attempt factorization</button>
+          <p id="eve-attempts" class="hint mono small"></p>
+        </div>
+      </div>
+
+      <div class="panel panel-log">
+        <h3>Case log</h3>
+        <div id="event-log" class="event-log"></div>
+      </div>
+
+    </div>
+
+    <button id="btn-next-round" class="btn btn-primary hidden">Start next round</button>
+  </section>
+
+  <!-- SCREEN: match over -->
+  <section id="screen-over" class="screen hidden">
+    <div class="panel panel-result">
+      <h2 id="result-title">Match complete</h2>
+      <p id="result-detail" class="lede"></p>
+      <p class="mono">Defenders <span id="result-defender-wins"></span> – <span id="result-eve-wins"></span> Eve</p>
+      <button id="btn-play-again" class="btn btn-primary">Return to lobby</button>
+    </div>
+  </section>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

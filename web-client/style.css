@@ -1,0 +1,309 @@
+:root {
+  --bg: #101215;
+  --panel: #181b1f;
+  --panel-muted: #15171b;
+  --hairline: #2b2f35;
+  --ink: #e9e6dd;
+  --ink-muted: #8c9298;
+  --amber: #c9903f;
+  --alice: #5fb0ae;
+  --bob: #8fa86a;
+  --eve: #c25c50;
+  --danger: #c25c50;
+  --radius: 3px;
+
+  --font-display: "Space Grotesk", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-display);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+.wrap {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 40px 20px 80px;
+}
+
+.hidden { display: none !important; }
+
+/* ---- masthead ---- */
+
+.masthead {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 32px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.masthead-mark {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  color: var(--bg);
+  background: var(--amber);
+  padding: 6px 10px;
+  border-radius: var(--radius);
+  font-weight: 600;
+}
+
+.masthead h1 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.masthead p {
+  margin: 2px 0 0;
+  color: var(--ink-muted);
+  font-size: 14px;
+}
+
+/* ---- panels ---- */
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin-bottom: 20px;
+}
+
+.panel-muted { background: var(--panel-muted); }
+
+.panel h2 { margin: 0 0 8px; font-size: 19px; font-weight: 600; }
+.panel h3 { margin: 0 0 12px; font-size: 15px; font-weight: 600; color: var(--ink-muted); }
+
+.lede { color: var(--ink-muted); font-size: 14px; margin: 0 0 20px; }
+
+/* ---- form fields ---- */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  color: var(--ink-muted);
+}
+
+.field em { font-style: normal; opacity: 0.7; }
+
+.field input {
+  background: var(--bg);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 15px;
+}
+
+.field input:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 1px;
+}
+
+.field-inline { flex: 1; }
+.attack-row { display: flex; gap: 12px; }
+.attack-row input { font-family: var(--font-mono); }
+
+/* ---- buttons ---- */
+
+.btn {
+  appearance: none;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  padding: 11px 18px;
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+}
+
+.btn:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.btn-primary {
+  background: var(--amber);
+  color: #171310;
+}
+.btn-primary:hover:not(:disabled) { filter: brightness(1.08); }
+
+.btn-danger {
+  background: transparent;
+  border-color: var(--eve);
+  color: var(--eve);
+}
+.btn-danger:hover:not(:disabled) { background: rgba(194, 92, 80, 0.12); }
+
+.error { color: var(--eve); font-size: 13px; min-height: 18px; margin: 10px 0 0; }
+.hint { color: var(--ink-muted); font-size: 13px; margin: 12px 0 0; }
+
+/* ---- lobby ---- */
+
+.room-code-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.room-code {
+  font-size: 24px;
+  letter-spacing: 0.12em;
+  color: var(--amber);
+}
+
+.label {
+  font-size: 12px;
+  color: var(--ink-muted);
+  text-transform: none;
+}
+
+.player-list {
+  list-style: none;
+  margin: 0 0 20px;
+  padding: 0;
+  border-top: 1px solid var(--hairline);
+}
+
+.player-list li {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--hairline);
+  font-size: 14px;
+}
+
+.player-role-tag {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: var(--radius);
+  border: 1px solid var(--hairline);
+  color: var(--ink-muted);
+}
+
+.player-role-tag.alice { color: var(--alice); border-color: var(--alice); }
+.player-role-tag.bob { color: var(--bob); border-color: var(--bob); }
+.player-role-tag.eve { color: var(--eve); border-color: var(--eve); }
+
+/* ---- status bar ---- */
+
+.status-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 14px 20px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  margin-bottom: 20px;
+  background: var(--panel-muted);
+}
+
+.status-item { display: flex; flex-direction: column; gap: 2px; }
+.status-item .label { font-size: 11px; }
+.status-timer { margin-left: auto; text-align: right; }
+
+.role-badge {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 600;
+}
+.role-badge.alice { color: var(--alice); }
+.role-badge.bob { color: var(--bob); }
+.role-badge.eve { color: var(--eve); }
+
+.timer { font-size: 18px; color: var(--amber); }
+
+/* ---- game grid ---- */
+
+.game-grid {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 620px) {
+  .game-grid { grid-template-columns: 1fr; }
+}
+
+.key-block {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 16px;
+  padding: 10px 12px;
+  background: var(--bg);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+}
+
+.key-value {
+  font-size: 13px;
+  word-break: break-all;
+  color: var(--ink);
+}
+
+.key-secret { color: var(--amber); }
+
+.reveal-box {
+  margin-top: 16px;
+  padding: 14px;
+  border: 1px solid var(--alice);
+  border-radius: var(--radius);
+  background: rgba(95, 176, 174, 0.08);
+  font-family: var(--font-mono);
+  font-size: 15px;
+}
+
+/* ---- event log ---- */
+
+.panel-log { max-height: 480px; display: flex; flex-direction: column; }
+
+.event-log {
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+}
+
+.event-log .entry {
+  padding: 8px 10px;
+  border-left: 2px solid var(--hairline);
+  color: var(--ink-muted);
+}
+
+.event-log .entry.eve { border-left-color: var(--eve); color: var(--eve); }
+.event-log .entry.alice { border-left-color: var(--alice); }
+.event-log .entry.bob { border-left-color: var(--bob); }
+.event-log .entry.system { border-left-color: var(--amber); color: var(--ink); }
+
+/* ---- result screen ---- */
+
+.panel-result { text-align: left; }
+#btn-next-round { margin-top: 4px; }
+
+/* ---- leaderboard ---- */
+
+#leaderboard-body div { display: flex; justify-content: space-between; padding: 4px 0; }
+.small { font-size: 12px; }
+.muted { color: var(--ink-muted); }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
