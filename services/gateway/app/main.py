@@ -16,9 +16,7 @@ MATCH_SERVICE_URL = os.environ.get("MATCH_SERVICE_URL", "http://localhost:8002")
 
 @app.on_event("startup")
 async def on_startup():
-    start_background_listener(REDIS_URL)
-    # One shared client for the life of the process, instead of a new
-    # one per message — cheap fix, noted as a TODO in the original scaffold.
+    app.state.redis_listener_task = start_background_listener(REDIS_URL)
     app.state.http = httpx.AsyncClient()
 
 
@@ -110,7 +108,5 @@ async def _handle_client_message(
                     "candidate_q": msg["candidate_q"],
                 },
             )
-    except httpx.HTTPStatusError:
-        # match-service rejected the action (e.g. wrong player, wrong
-        # phase) — that's expected game-flow noise, not a gateway bug.
+    except httpx.HTTPError:
         pass
