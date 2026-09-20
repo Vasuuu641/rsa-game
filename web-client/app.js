@@ -180,8 +180,12 @@ function enterGameScreen() {
   renderHud();
   renderRolePanel();
   logEvent(`You are ${ROLE_LABEL[state.role]}. ${state.players.length} players in the room.`, state.role);
-}
 
+  if (state.round === 0) {
+    $("btn-next-round").textContent = "Begin round 1";
+    $("btn-next-round").classList.remove("hidden");
+  }
+}
 function renderHud() {
   $("hud-room").textContent = state.roomId;
   $("hud-role").textContent = ROLE_LABEL[state.role] || "—";
@@ -303,6 +307,7 @@ function onRoundTimer(msg) {
 
 function onRoundReady(msg) {
   $("hud-timer").textContent = "—";
+  $("btn-next-round").textContent = "Start next round";   // <-- add this line
   $("btn-next-round").classList.remove("hidden");
   logEvent(`Round ${state.round} is over. Round ${msg.next_round} is ready when you are.`, "system");
 }

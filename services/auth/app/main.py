@@ -21,7 +21,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-MATCH_SERVICE_URL = os.environ.get("MATCH_SERVICE_URL", "http://localhost:8000")
+MATCH_SERVICE_URL = os.environ.get("MATCH_SERVICE_URL", "http://localhost:8002")
 
 JWT_SECRET = os.environ.get("JWT_SECRET", "dev-secret-change-me")
 JWT_ALGO = "HS256"

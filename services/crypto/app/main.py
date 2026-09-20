@@ -115,7 +115,3 @@ async def crack(req: CrackRequest):
     return CrackResponse(correct=True, plaintext=rsa_ops.blocks_to_text(plain_blocks))
 
 
-# TODO: rate-limit /verify-attack and /crack per room so Eve can't
-# brute-force by spamming requests faster than the game's "attempts
-# used" counter tracks — either here or in match-service, which is the
-# only caller of this service.

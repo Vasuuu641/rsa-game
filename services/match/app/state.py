@@ -11,20 +11,9 @@ class PlayerState:
     display_name: str
     role: str | None = None
 
-@dataclass
-class GameState:
-    # 1. Mandatory fields without default values first:
-    player_id: str
-    session_token: str
-    
-    # 2. Fields with default values last:
-    score: int = 0
-    is_active: bool = True
-
 
 @dataclass
 class RoomState:
-    last_attack_time: float = 0.0
     room_id: str
     players: dict[str, PlayerState] = field(default_factory=dict)
     round_number: int = 0
@@ -40,6 +29,9 @@ class RoomState:
     # what Eve has to work with
     last_ciphertext: list[int] | None = None
     attempts_used: int = 0
+
+    # rate limiting
+    last_attack_time: float = 0.0
 
     # match score across rounds
     defender_wins: int = 0
